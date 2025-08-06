@@ -1,0 +1,109 @@
+
+## 🧾 SQL Queries Used in Analysis
+
+-- 🍕 Pizza Sales Analysis SQL Queries
+-- ===================================
+
+-- 1️⃣ Retrieve the total number of orders placed
+SELECT 
+    COUNT(order_id) AS Total_orders
+FROM
+    orders;
+
+-- 2️⃣ Calculate the total revenue generated from pizza sales
+SELECT 
+    ROUND(SUM(order_details.quantity * pizzas.price), 2) AS Total_revenue
+FROM
+    order_details
+JOIN
+    pizzas ON order_details.pizza_id = pizzas.pizza_id;
+
+-- 3️⃣ Identify the highest-priced pizza
+SELECT 
+    pizza_types.name, 
+    pizzas.price
+FROM
+    pizza_types
+JOIN
+    pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+ORDER BY 
+    price DESC
+LIMIT 1;
+
+-- 4️⃣ Identify the most common pizza size ordered
+SELECT 
+    pizzas.size,
+    COUNT(order_details.order_details_id) AS order_count
+FROM
+    pizzas
+JOIN
+    order_details ON pizzas.pizza_id = order_details.pizza_id
+GROUP BY 
+    pizzas.size
+ORDER BY 
+    order_count DESC;
+
+-- 5️⃣ List the top 5 most ordered pizza types
+SELECT 
+    pizza_types.name, 
+    SUM(order_details.quantity) AS Quantity
+FROM
+    pizza_types
+JOIN
+    pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+JOIN
+    order_details ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY 
+    pizza_types.name
+ORDER BY 
+    Quantity DESC
+LIMIT 5;
+
+-- 6️⃣ Find total quantity by pizza category
+SELECT 
+    pizza_types.category,
+    SUM(order_details.quantity) AS Quantity
+FROM
+    pizza_types
+JOIN
+    pizzas ON pizza_types.pizza_type_id = pizzas.pizza_type_id
+JOIN
+    order_details ON order_details.pizza_id = pizzas.pizza_id
+GROUP BY 
+    pizza_types.category
+ORDER BY 
+    Quantity DESC;
+
+-- 7️⃣ Distribution of orders by hour
+SELECT 
+    HOUR(order_time) AS Order_Hour, 
+    COUNT(order_id) AS Order_Count
+FROM
+    orders
+GROUP BY 
+    HOUR(order_time)
+ORDER BY 
+    Order_Hour;
+
+-- 8️⃣ Category-wise distribution of pizzas
+SELECT 
+    category, 
+    COUNT(name) AS Pizza_Count
+FROM
+    pizza_types
+GROUP BY 
+    category;
+
+-- 9️⃣ Average pizzas ordered per day
+SELECT 
+    ROUND(AVG(quantity), 0) AS Average_pizzas_per_day
+FROM
+    (SELECT 
+        orders.order_date, 
+        SUM(order_details.quantity) AS quantity
+    FROM
+        orders
+    JOIN 
+        order_details ON orders.order_id = order_details.order_id
+    GROUP BY 
+        orders.order_date) AS order_quantity;
